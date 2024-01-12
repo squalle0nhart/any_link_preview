@@ -83,10 +83,11 @@ class LinkViewVertical extends StatelessWidget {
                                         topLeft: Radius.circular(12),
                                         topRight: Radius.circular(12),
                                       ),
-                                image: DecorationImage(
-                                  image: imageProvider!,
-                                  fit: BoxFit.fitWidth,
-                                ),
+                              ),
+                              child: Image(
+                                image: imageProvider!,
+                                fit: BoxFit.fitWidth,
+                                gaplessPlayback: true,
                               ),
                             ),
                     )
