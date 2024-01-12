@@ -88,11 +88,10 @@ class LinkViewHorizontal extends StatelessWidget {
                                         topLeft: Radius.circular(radius!),
                                         bottomLeft: Radius.circular(radius!),
                                       ),
-                              ),
-                              child: Image(
-                                image: imageProvider!,
-                                fit: BoxFit.cover,
-                                gaplessPlayback: true,
+                                image: DecorationImage(
+                                  image: imageProvider!,
+                                  fit: BoxFit.cover,
+                                )
                               ),
                             ),
                     )

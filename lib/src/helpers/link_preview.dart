@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:any_link_preview/any_link_preview.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:string_validator/string_validator.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -11,6 +12,10 @@ import '../widgets/link_view_horizontal.dart';
 import '../widgets/link_view_vertical.dart';
 
 enum UIDirection { uiDirectionVertical, uiDirectionHorizontal }
+
+class LinkPreviewCache {
+  static Map<String, BaseMetaInfo?> cache = {};
+}
 
 class AnyLinkPreview extends StatefulWidget {
   /// Display direction. One among `uiDirectionVertical, uiDirectionHorizontal`
@@ -280,11 +285,16 @@ class AnyLinkPreviewState extends State<AnyLinkPreview> {
   }
 
   Future<void> _getInfo(String link) async {
-    _info = await AnyLinkPreview._getMetadata(
-      link,
-      cache: widget.cache,
-      headers: widget.headers,
-    );
+    if (LinkPreviewCache.cache[link] != null) {
+      _info = LinkPreviewCache.cache[link];
+    } else {
+      _info = await AnyLinkPreview._getMetadata(
+        link,
+        cache: widget.cache,
+        headers: widget.headers,
+      );
+      LinkPreviewCache.cache[link] = _info;
+    }
     if (mounted) {
       setState(() {
         _loading = false;
@@ -347,7 +357,6 @@ class AnyLinkPreviewState extends State<AnyLinkPreview> {
       height: height,
       child: (widget.displayDirection == UIDirection.uiDirectionHorizontal)
           ? LinkViewHorizontal(
-              key: widget.key ?? Key(originalLink.toString()),
               url: originalLink,
               title: title,
               description: desc,
@@ -362,7 +371,6 @@ class AnyLinkPreviewState extends State<AnyLinkPreview> {
               radius: widget.borderRadius ?? 12,
             )
           : LinkViewVertical(
-              key: widget.key ?? Key(originalLink.toString()),
               url: originalLink,
               title: title,
               description: desc,
@@ -382,7 +390,7 @@ class AnyLinkPreviewState extends State<AnyLinkPreview> {
   ImageProvider? _buildImageProvider(String? image) {
     ImageProvider? imageProvider;
     try {
-      if (image != null) imageProvider = NetworkImage(image);
+      if (image != null) imageProvider = CachedNetworkImageProvider(image);
       if (image != null && image.startsWith('data:image')) {
         imageProvider = MemoryImage(
           base64Decode(image.substring(image.indexOf('base64') + 7)),
